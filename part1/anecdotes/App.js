@@ -15,7 +15,9 @@ const App = () => {
   const [selected, setSelected] = useState(0)
 
   const handleClick = () => {
-    setSelected(Math.random() * anecdotes.length)
+    let x = Math.floor((Math.random() * anecdotes.length))
+    console.log(x)
+    setSelected(x)
   }
 
   return (
