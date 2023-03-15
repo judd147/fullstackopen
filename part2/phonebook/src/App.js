@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 //render a filter field
 const Filter = ({ filter, handleFilterChange }) => {
@@ -29,9 +29,17 @@ const PersonForm = ({ addName, newName, handleNameChange, newNumber, handleNumbe
 
 //render names and numbers
 const Person = ({ person, filter }) => {
+  const handleDeletion = id =>{
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      
+    }
+  }
   if (person.name.toLowerCase().includes(filter.toLowerCase())) {
     return (
-      <p>{person.name} {person.number}</p>
+        <p>
+          {person.name} {person.number}
+          <button onClick={handleDeletion}>delete</button>
+        </p>
     )
   }
 }
@@ -42,13 +50,12 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
+  //Initialize data from server
   const hook = () => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }
   useEffect(hook, [])
@@ -58,7 +65,12 @@ const App = () => {
     const NameObject = {name: newName, number: newNumber, id: persons.length + 1}
     const found = persons.find(person => person.name === newName) //check if the name is already in phonebook
     if (found === undefined) {
-      setPersons(persons.concat(NameObject))
+      // send user input data to server
+      personService
+        .create(NameObject)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+        })
     }
     else {
       window.alert(`${newName} is already added to phonebook`) //issue warning to user
