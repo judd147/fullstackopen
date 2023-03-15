@@ -28,17 +28,12 @@ const PersonForm = ({ addName, newName, handleNameChange, newNumber, handleNumbe
 }
 
 //render names and numbers
-const Person = ({ person, filter }) => {
-  const handleDeletion = id =>{
-    if (window.confirm(`Delete ${person.name} ?`)) {
-      
-    }
-  }
+const Person = ({ person, filter, handleDeletion }) => {
   if (person.name.toLowerCase().includes(filter.toLowerCase())) {
     return (
         <p>
           {person.name} {person.number}
-          <button onClick={handleDeletion}>delete</button>
+          <button onClick={() => handleDeletion(person)}>delete</button>
         </p>
     )
   }
@@ -62,7 +57,7 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault() //prevent dafault action of submitting the form and reload
-    const NameObject = {name: newName, number: newNumber, id: persons.length + 1}
+    const NameObject = {name: newName, number: newNumber}
     const found = persons.find(person => person.name === newName) //check if the name is already in phonebook
     if (found === undefined) {
       // send user input data to server
@@ -73,7 +68,16 @@ const App = () => {
         })
     }
     else {
-      window.alert(`${newName} is already added to phonebook`) //issue warning to user
+      // replace the old number with a new one
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const person = persons.find(p => p.name === newName) // find the person we want to modify
+        const changedPerson = { ...person, number: newNumber } // copy the old name but update the number
+        personService
+          .update(changedPerson.id, changedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== changedPerson.id ? person : returnedPerson)) // If id matched, reset with the person returned by the server.
+        })
+      }
     }
     //reset user input
     setNewName('')
@@ -98,6 +102,14 @@ const App = () => {
     setFilter(event.target.value)
   }
 
+  const handleDeletion = (person) => {
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      personService
+        .remove(person.id)
+        setPersons(persons.filter(p => p.id !== person.id))
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -106,7 +118,7 @@ const App = () => {
       <PersonForm addName={addName} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
       {persons.map(person => 
-        <Person key={person.id} person={person} filter={filter}/>
+        <Person key={person.id} person={person} filter={filter} handleDeletion={handleDeletion}/>
       )}
     </div>
   )
