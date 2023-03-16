@@ -1,49 +1,16 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
-
-//render a filter field
-const Filter = ({ filter, handleFilterChange }) => {
-  return (
-    <div>
-      filter shown with: <input value={filter} onChange={handleFilterChange} />
-    </div>
-  )
-}
-
-//render a form for user input
-const PersonForm = ({ addName, newName, handleNameChange, newNumber, handleNumberChange }) => {
-  return (
-    <form onSubmit={addName}>
-      <div>
-        name: <input value={newName} onChange={handleNameChange} />
-      </div>
-      <div>
-        number: <input value={newNumber} onChange={handleNumberChange}/>
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  )
-}
-
-//render names and numbers
-const Person = ({ person, filter, handleDeletion }) => {
-  if (person.name.toLowerCase().includes(filter.toLowerCase())) {
-    return (
-        <p>
-          {person.name} {person.number}
-          <button onClick={() => handleDeletion(person)}>delete</button>
-        </p>
-    )
-  }
-}
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Person from './components/Person'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
 
   //Initialize data from server
   const hook = () => {
@@ -65,7 +32,11 @@ const App = () => {
         .create(NameObject)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
+          setMessage(`added ${newName}`)        
         })
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
     }
     else {
       // replace the old number with a new one
@@ -75,8 +46,16 @@ const App = () => {
         personService
           .update(changedPerson.id, changedPerson)
           .then(returnedPerson => {
-            setPersons(persons.map(person => person.id !== changedPerson.id ? person : returnedPerson)) // If id matched, reset with the person returned by the server.
-        })
+            setPersons(persons.map(person => person.id !== changedPerson.id ? person : returnedPerson)) // If id matched, reset with the person returned by the server
+            setMessage(`changed ${newName}'s number`)
+          })
+          .catch(error => {
+            setMessage(`Information of ${newName} has already been removed from server`)
+            console.log(error)
+          })
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
       }
     }
     //reset user input
@@ -113,6 +92,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter filter={filter} handleFilterChange={handleFilterChange}/>
       <h3>Add a new</h3>
       <PersonForm addName={addName} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
