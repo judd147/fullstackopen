@@ -17,13 +17,8 @@
     },
     {
       "content": "sb",
-      "important": false,
-      "id": 4
-    },
-    {
-      "content": "cnm",
       "important": true,
-      "id": 5
+      "id": 4
     }
   ]
 }
