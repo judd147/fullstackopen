@@ -5,4 +5,4 @@ Stores all files that are submitted to the fullstackopen course. Please note tha
 In this part, three naive examples of React App were implemented. Since index.js remains the same, it's put outside the folders.
 
 ## Part 2
-In this part, concepts of communicating with the server were demonstrated in the Apps. In particular, the notes app is the running example during the course.
+In this part, concepts of communicating with the server were demonstrated in the Apps using Axios. In particular, the notes app is the running example during the course. The phonebook app is a rather complete excercise for this part.
