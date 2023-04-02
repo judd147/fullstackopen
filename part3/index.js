@@ -1,4 +1,5 @@
-const http = require('http') //CommonJS module version of import http from 'http'(ES6 module)
+const express = require('express')
+const app = express() //create an express application
 
 let notes = [
   {
@@ -18,12 +19,18 @@ let notes = [
   }
 ]
 
-//an event handler is called when an HTTP request is made to the server's address
-const app = http.createServer((request, response) => { 
-  response.writeHead(200, { 'Content-Type': 'application/json' }) //set status code and Content-Type header
-  response.end(JSON.stringify(notes)) //set content
+//define two routes to the application
+//The first route defines an event handler that handles HTTP GET requests made to the application's root
+app.get('/', (request, response) => {
+  response.send('<h1>Hello World!</h1>') //the server respond to the HTTP request by sending the string Hello World!
+})
+
+//The second route defines an event handler that handles HTTP GET requests made to the notes path of the application
+app.get('/api/notes', (request, response) => {
+  response.json(notes) //send the notes array as a JSON formatted string
 })
 
 const PORT = 3001
-app.listen(PORT) //bind the http server assigned to the app variable, to listen to HTTP requests sent to port 3001
-console.log(`Server running on port ${PORT}`)
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
