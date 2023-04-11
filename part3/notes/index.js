@@ -49,18 +49,35 @@ app.delete('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
   notes = notes.filter(note => note.id !== id)
 
-  response.status(204).end() //respond with the status code 204 no content
+  response.status(204).end() //respond with status code 204 no content
 })
+
+
+const generateId = () => {
+  //if notes is not empty, compute maxID; otherwise maxID is zero
+  const maxId = notes.length > 0
+    ? Math.max(...notes.map(n => n.id)) //Math.max can't take an array which can be transformed into individual numbers by using the spread syntax
+    : 0
+  return maxId + 1
+}
 
 //Route for adding a new note
 app.post('/api/notes', (request, response) => {
-  //if notes is not empty, compute maxID; otherwise maxID is zero
-  const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id)) 
-    : 0
-  const note = request.body //The event handler can access the data from the body property of the request object
-  note.id = maxId + 1
-  notes = notes.concat(note) //incorporate the new note
+  const body = request.body //The event handler can access the data from the body property of the request object
+  //The content property may not be empty, respond with status code 400 bad request
+  if (!body.content) {
+    return response.status(400).json({ 
+      error: 'content missing' 
+    })
+  }
+
+  const note = {
+    content: body.content,
+    important: body.important || false, //If the property does not exist, the expression will evaluate to false
+    id: generateId(),
+  }
+
+  notes = notes.concat(note) //append the new note
   response.json(note)
 })
 
