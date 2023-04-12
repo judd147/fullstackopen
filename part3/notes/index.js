@@ -3,6 +3,7 @@ const cors = require('cors')
 const app = express() //create an express application
 app.use(express.json()) //use express json parser to help access data
 app.use(cors()) //use cors to allow for requests from all origins
+app.use(express.static('build')) //make express show static content
 
 let notes = [
   {
