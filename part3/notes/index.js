@@ -1,6 +1,8 @@
 const express = require('express')
+const cors = require('cors')
 const app = express() //create an express application
 app.use(express.json()) //use express json parser to help access data
+app.use(cors()) //use cors to allow for requests from all origins
 
 let notes = [
   {
@@ -72,16 +74,16 @@ app.post('/api/notes', (request, response) => {
   }
 
   const note = {
+    id: generateId(),
     content: body.content,
     important: body.important || false, //If the property does not exist, the expression will evaluate to false
-    id: generateId(),
   }
 
   notes = notes.concat(note) //append the new note
   response.json(note)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001 //Hosting service configuration
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
