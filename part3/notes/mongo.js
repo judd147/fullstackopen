@@ -22,7 +22,7 @@ const Note = mongoose.model('Note', noteSchema)
 
 // creates a new note object
 const note = new Note({
-  content: 'HTML is Easy',
+  content: 'Callback-functions suck',
   important: true,
 })
 
@@ -35,9 +35,7 @@ Note.find({}).then(result => {
 })
 
 // saves the object to the database
-/*
 note.save().then(result => {
   console.log('note saved!')
   mongoose.connection.close()
 })
-*/
