@@ -1,11 +1,26 @@
 require('dotenv').config() // gets imported at first
 const express = require('express')
 const cors = require('cors')
+const Note = require('./models/note') // import the mongoose model
 const app = express() // create an express application
+
+// handler of requests with unknown endpoint
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+// custom Express error handler
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' }) // respond with status code 400 Bad Request
+  } 
+  next(error) // else, passes the error forward to the default Express error handler
+}
+
 app.use(express.json()) // use express json parser to help access data
 app.use(cors()) // use cors to allow for requests from all origins
 app.use(express.static('build')) // make express show static content
-const Note = require('./models/note') // import the mongoose model
 
 // The first route defines an event handler that handles HTTP GET requests made to the application's root
 app.get('/', (request, response) => {
@@ -20,18 +35,39 @@ app.get('/api/notes', (request, response) => {
 })
 
 // Route for fetching a single resource
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response, next) => {
   Note.findById(request.params.id).then(note => {
-    response.json(note)
-  })
+    // error handling
+    if (note) {
+      response.json(note)
+    } else {
+      response.status(404).end()
+    }
+  }) // additional catch if promise is rejected
+  .catch(error => next(error)) // continue to the custom error handler middleware
 })
 
 // Route for deleting resources
-app.delete('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
-  notes = notes.filter(note => note.id !== id)
+app.delete('/api/notes/:id', (request, response, next) => {
+  Note.findByIdAndRemove(request.params.id).then(result => {
+    response.status(204).end() // respond with status code 204 no content
+  })
+  .catch(error => next(error)) // continue to the custom error handler middleware
+})
 
-  response.status(204).end() // respond with status code 204 no content
+// Route for updating resources(toggle importance)
+app.put('/api/notes/:id', (request, response, next) => {
+  const body = request.body
+  const note = {
+    content: body.content,
+    important: body.important,
+  }
+
+  Note.findByIdAndUpdate(request.params.id, note, { new: true }) // cause our event handler to be called with the new modified document
+    .then(updatedNote => {
+      response.json(updatedNote)
+    })
+    .catch(error => next(error)) // continue to the custom error handler middleware
 })
 
 // Route for adding a new resource
@@ -51,6 +87,9 @@ app.post('/api/notes', (request, response) => {
     response.json(savedNote)
   })
 })
+
+app.use(unknownEndpoint) // next to the last middleware
+app.use(errorHandler) // this has to be the last loaded middleware
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
