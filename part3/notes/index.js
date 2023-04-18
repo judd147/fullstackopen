@@ -36,8 +36,8 @@ app.delete('/api/notes/:id', (request, response) => {
 
 // Route for adding a new resource
 app.post('/api/notes', (request, response) => {
-  const body = request.body //The event handler can access the data from the body property of the request object
-  //The content property may not be empty, respond with status code 400 bad request
+  const body = request.body // The event handler can access the data from the body property of the request object
+  // The content property may not be empty, respond with status code 400 bad request
   if (body.content === undefined) {
     return response.status(400).json({ error: 'content missing' })
   }

@@ -14,7 +14,6 @@ mongoose.connect(url)
 
 // define the schema for a person and the matching model
 const personSchema = new mongoose.Schema({
-  //id: Number,
   name: String,
   number: String
 })
