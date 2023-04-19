@@ -6,3 +6,6 @@ In this part, three naive examples of React App were implemented. Since index.js
 
 ## Part 2
 In this part, concepts of communicating with the server were demonstrated in the Apps using Axios. In particular, the notes app is the running example during the course. The phonebook app is a rather complete excercise for this part.
+
+## Part 3
+In this part, backend/server programming was introduced using Node.js and Express and the data is stored in MongoDB Cloud. In addition, middleware was introduced and utilized. Finally, a production build of frontend was placed in the backend folder which would be deployed using hosting service like Render.io. Now, note and phonebook are both fullstack CRUD apps.
