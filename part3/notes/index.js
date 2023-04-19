@@ -15,6 +15,9 @@ const errorHandler = (error, request, response, next) => {
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' }) // respond with status code 400 Bad Request
   } 
+  else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message }) // handle validation errors
+  }
   next(error) // else, passes the error forward to the default Express error handler
 }
 
@@ -57,13 +60,9 @@ app.delete('/api/notes/:id', (request, response, next) => {
 
 // Route for updating resources(toggle importance)
 app.put('/api/notes/:id', (request, response, next) => {
-  const body = request.body
-  const note = {
-    content: body.content,
-    important: body.important,
-  }
+  const { content, important } = request.body
 
-  Note.findByIdAndUpdate(request.params.id, note, { new: true }) // cause our event handler to be called with the new modified document
+  Note.findByIdAndUpdate(request.params.id, { content, important }, { new: true, runValidators: true, context: 'query' }) // cause our event handler to be called with the new modified document
     .then(updatedNote => {
       response.json(updatedNote)
     })
