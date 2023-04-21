@@ -18,7 +18,10 @@ const errorHandler = (error, request, response, next) => {
   console.error(error.message)
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' }) // respond with status code 400 Bad Request
-  } 
+  }
+  else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message }) // handle validation errors
+  }
   next(error) // else, passes the error forward to the default Express error handler
 }
 
@@ -79,7 +82,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 // Route for adding a new resource; Test with REST Client
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body // access the data
   // Handle errors and respond with status code 400 bad request
   if (!body.name) {
@@ -101,6 +104,7 @@ app.post('/api/persons', (request, response) => {
   person.save().then(savedPerson => { // save the new object to database
     response.json(savedPerson)
   })
+  .catch(error => next(error)) // continue to the custom error handler middleware
 })
 
 app.use(unknownEndpoint) // next to the last middleware

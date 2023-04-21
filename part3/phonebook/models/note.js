@@ -15,27 +15,18 @@ mongoose.connect(url)
     console.log('error connecting to MongoDB:', error.message)
   })
 
-// Define the schema for a person with validation rules
-const personSchema = new mongoose.Schema({
-  name: {
+// Define the schema for a note with validation rules
+const noteSchema = new mongoose.Schema({
+  content: {
     type: String,
-    minLength: 3,
+    minLength: 5,
     required: true
   },
-  number: {
-    type: String,
-    minLength: 8,
-    required: true,
-    validate: {
-      validator: function(v) {
-        return /\d{2,3}-\d+/.test(v) // match 2 or 3 numbers and multiple numbers separated by "-"
-      },
-    }
-  }
+  important: Boolean
 })
 
 // Change the configurable options of the schema
-personSchema.set('toJSON', {
+noteSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString() // _id is in fact an object. The toJSON method we defined transforms it into a string just to be safe.
     delete returnedObject._id
@@ -43,5 +34,5 @@ personSchema.set('toJSON', {
   }
 })
 
-// Export the public interface of the module, which is the Person model
-module.exports = mongoose.model('Person', personSchema)
+// Export the public interface of the module, which is the Note model
+module.exports = mongoose.model('Note', noteSchema)

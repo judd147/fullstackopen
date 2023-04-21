@@ -7,39 +7,35 @@ if (process.argv.length<3) {
 
 const password = process.argv[2]
 
-const url = `mongodb+srv://fullstack:${password}@cluster0.tkkwpa0.mongodb.net/phonebookApp?retryWrites=true&w=majority`
+const url = `mongodb+srv://fullstack:${password}@cluster0.tkkwpa0.mongodb.net/noteApp?retryWrites=true&w=majority`
 
 mongoose.set('strictQuery',false)
 mongoose.connect(url)
 
-// define the schema for a person and the matching model
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String
+// define the schema for a note and the matching model
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
 })
 
-const Person = mongoose.model('Person', personSchema)
+const Note = mongoose.model('Note', noteSchema)
 
-// retrieve all objects from database if password is the only parameter
-if (process.argv.length === 3) {
-    Person.find({}).then(result => {
-        result.forEach(person => {
-          console.log(person)
-        })
-        mongoose.connection.close()
+// creates a new note object
+const note = new Note({
+  content: 'Callback-functions suck',
+  important: true,
+})
+
+// retrieve objects from database
+Note.find({}).then(result => {
+    result.forEach(note => {
+      console.log(note)
     })
-}
-
-// saves the object to the database if more parameters are provided
-if (process.argv.length > 3) {
-    // creates a new person object based on command line input
-    const person = new Person({
-        name: process.argv[3],
-        number: process.argv[4],
-    })
-
-    person.save().then(result => {
-    console.log(`Added ${process.argv[3]} number ${process.argv[4]} to phonebook`)
     mongoose.connection.close()
-    })
-}
+})
+
+// saves the object to the database
+note.save().then(result => {
+  console.log('note saved!')
+  mongoose.connection.close()
+})
