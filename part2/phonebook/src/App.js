@@ -32,7 +32,11 @@ const App = () => {
         .create(NameObject)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          setMessage(`added ${newName}`)        
+          setMessage(`added ${newName}`)
+        })
+        .catch(error => {
+          setMessage(`${error.response.data.error}`) // handle validation errors
+          console.log(error.response.data.error)
         })
       setTimeout(() => {
         setMessage(null)
