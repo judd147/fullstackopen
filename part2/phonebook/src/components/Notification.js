@@ -9,7 +9,7 @@ const Notification = ({ message }) => {
             </div>
         )
     }
-    else if (message.includes('removed')){
+    else if ((message.includes('removed')) || (message.includes('failed'))) {
         return (
             <div className='error'>
                 {message}
