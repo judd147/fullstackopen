@@ -28,14 +28,14 @@ const note = new Note({
 
 // retrieve objects from database
 Note.find({}).then(result => {
-    result.forEach(note => {
-      console.log(note)
-    })
-    mongoose.connection.close()
+  result.forEach(note => {
+    console.log(note)
+  })
+  mongoose.connection.close()
 })
 
 // saves the object to the database
-note.save().then(result => {
+note.save().then(() => {
   console.log('note saved!')
   mongoose.connection.close()
 })

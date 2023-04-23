@@ -27,7 +27,7 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(express.json()) // use express json parser to help access data
 app.use(cors()) // use cors to allow for requests from all origins
-app.use(express.static('build')) // make express show static content
+app.use(express.static('build')) // make express show static content
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content')) // use morgan for logging in custom format
 
 // Route for fetching all resources
@@ -54,16 +54,14 @@ app.get('/api/persons/:id', (request, response, next) => {
     } else {
       response.status(404).end()
     }
-  }) // additional catch if promise is rejected
-  .catch(error => next(error)) // continue to the custom error handler middleware
+  }).catch(error => next(error)) // continue to the custom error handler middleware
 })
 
 // Route for deleting a single resource; Test with REST Client
 app.delete('/api/persons/:id', (request, response, next) => {
-  Person.findByIdAndRemove(request.params.id).then(result => {
+  Person.findByIdAndRemove(request.params.id).then(() => {
     response.status(204).end() // respond with status code 204 no content
-  })
-  .catch(error => next(error)) // continue to the custom error handler middleware
+  }).catch(error => next(error)) // continue to the custom error handler middleware
 })
 
 // Route for updating resources(update number)
@@ -75,10 +73,9 @@ app.put('/api/persons/:id', (request, response, next) => {
   }
 
   Person.findByIdAndUpdate(request.params.id, person, { new: true }) // cause our event handler to be called with the new modified document
-  .then(updatedPerson => {
-    response.json(updatedPerson)
-  })
-  .catch(error => next(error)) // continue to the custom error handler middleware
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    }).catch(error => next(error)) // continue to the custom error handler middleware
 })
 
 // Route for adding a new resource; Test with REST Client
@@ -86,13 +83,13 @@ app.post('/api/persons', (request, response, next) => {
   const body = request.body // access the data
   // Handle errors and respond with status code 400 bad request
   if (!body.name) {
-    return response.status(400).json({ 
-    error: 'name missing' 
+    return response.status(400).json({
+      error: 'name missing'
     })
   }
   if (!body.number) {
     return response.status(400).json({
-    error: 'number missing'
+      error: 'number missing'
     })
   }
 
@@ -103,8 +100,7 @@ app.post('/api/persons', (request, response, next) => {
 
   person.save().then(savedPerson => { // save the new object to database
     response.json(savedPerson)
-  })
-  .catch(error => next(error)) // continue to the custom error handler middleware
+  }).catch(error => next(error)) // continue to the custom error handler middleware
 })
 
 app.use(unknownEndpoint) // next to the last middleware
