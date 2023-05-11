@@ -1,19 +1,6 @@
+/* THIS FLIE DEFINES THE MONGOOSE SCHEMA */
+
 const mongoose = require('mongoose')
-
-mongoose.set('strictQuery', false)
-
-const url = process.env.MONGODB_URI // Define the url using environment variable
-
-console.log('connecting to', url)
-
-// Connect to MongoDB
-mongoose.connect(url)
-  .then(result => {
-    console.log('connected to MongoDB')
-  })
-  .catch((error) => {
-    console.log('error connecting to MongoDB:', error.message)
-  })
 
 // Define the schema for a note with validation rules
 const noteSchema = new mongoose.Schema({
