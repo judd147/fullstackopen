@@ -10,22 +10,18 @@ notesRouter.get('/', async (request, response) => {
 })
 
 // Route for fetching a single resource
-notesRouter.get('/:id', async (request, response, next) => {
-  try {
-    const note = await Note.findById(request.params.id)
-    // error handling
-    if (note) {
-      response.json(note)
-    } else {
-      response.status(404).end()
-    }
-  } catch(exception) {
-    next(exception) // continue to the custom error handler middleware
+notesRouter.get('/:id', async (request, response) => {
+  const note = await Note.findById(request.params.id)
+  // error handling
+  if (note) {
+    response.json(note)
+  } else {
+    response.status(404).end()
   }
 })
 
 // Route for adding a new resource
-notesRouter.post('/', async (request, response, next) => {
+notesRouter.post('/', async (request, response) => {
   const body = request.body // access the data from the body property of the request object
   // The content property must not be empty, respond with status code 400 bad request
   if (body.content === undefined) {
@@ -37,22 +33,14 @@ notesRouter.post('/', async (request, response, next) => {
     important: body.important || false, // If the property does not exist, the expression will evaluate to false
   })
 
-  try {
-    const savedNote = await note.save() // save the new object to database
-    response.status(201).json(savedNote) // respond with status code 201 created
-  } catch(exception) {
-    next(exception) // continue to the custom error handler middleware
-  }
+  const savedNote = await note.save() // save the new object to database
+  response.status(201).json(savedNote) // respond with status code 201 created
 })
 
 // Route for deleting resources
-notesRouter.delete('/:id', async (request, response, next) => {
-  try {
-    await Note.findByIdAndRemove(request.params.id)
-    response.status(204).end() // respond with status code 204 no content
-  } catch(exception) {
-    next(exception) // continue to the custom error handler middleware
-  }
+notesRouter.delete('/:id', async (request, response) => {
+  await Note.findByIdAndRemove(request.params.id)
+  response.status(204).end() // respond with status code 204 no content
 })
 
 // Route for updating resources(toggle importance)

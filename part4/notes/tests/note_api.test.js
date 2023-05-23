@@ -7,11 +7,9 @@ const Note = require('../models/note') // import the database schema
 
 beforeEach(async () => {
   await Note.deleteMany({}) // clear out database
-  // save initial notes to database
-  let noteObject = new Note(helper.initialNotes[0])
-  await noteObject.save()
-  noteObject = new Note(helper.initialNotes[1])
-  await noteObject.save()
+  const noteObjects = helper.initialNotes.map(note => new Note(note)) // create an array of Mongoose objects (Note)
+  const promiseArray = noteObjects.map(note => note.save()) // create an array of promises for saving notes to DB
+  await Promise.all(promiseArray) // wait until every promise for saving a note is finished
 }, 200000) // set timeout
 
 test('notes are returned as json', async () => {
@@ -21,7 +19,7 @@ test('notes are returned as json', async () => {
     .expect('Content-Type', /application\/json/) // verify the Content-Type header using regex
 }, 200000) // set timeout
 
-// Test for Get All
+// Test for GET All
 test('all notes are returned', async () => {
   const response = await api.get('/api/notes')
   // execution gets here only after the HTTP request is complete
@@ -37,7 +35,7 @@ test('a specific note is within the returned notes', async () => {
   )
 })
 
-// Test for Get One
+// Test for GET One
 test('a specific note can be viewed', async () => {
   const notesAtStart = await helper.notesInDb()
 
@@ -87,7 +85,7 @@ test('note without content is not added', async () => {
   expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
 })
 
-// Test for Delete
+// Test for DELETE
 test('a note can be deleted', async () => {
   const notesAtStart = await helper.notesInDb()
   const noteToDelete = notesAtStart[0]
