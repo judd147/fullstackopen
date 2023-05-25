@@ -7,94 +7,131 @@ const Blog = require('../models/blog') // import the database schema
 
 beforeEach(async () => {
   await Blog.deleteMany({}) // clear out database
-  const blogObjects = listHelper.blogs.map(blog => new Blog(blog)) // create an array of Mongoose objects (Blog)
-  const promiseArray = blogObjects.map(blog => blog.save()) // create an array of promises for saving blogs to DB
-  await Promise.all(promiseArray) // wait until every promise for saving a blog is finished
-}, 200000) // set timeout
-
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200) // verify responded status code
-    .expect('Content-Type', /application\/json/) // verify the Content-Type header using regex
-}, 200000) // set timeout
-
-// Test for GET All
-test('all blogs are returned', async () => {
-  const response = await api.get('/api/blogs')
-  // execution gets here only after the HTTP request is complete
-  expect(response.body).toHaveLength(listHelper.blogs.length)
+  await Blog.insertMany(listHelper.blogs) // initialize database
 })
 
-// Test for ID Existence
-test('the unique identifier property of the blog posts is named id', async () => {
-  const response = await api.get('/api/blogs')
-  response.body.map(blog => {
-    expect(blog.id).toBeDefined()
+describe('when there is initially some blogs saved', () => {
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200) // verify responded status code
+      .expect('Content-Type', /application\/json/) // verify the Content-Type header using regex
+  }, 100000) // set timeout
+
+  test('all blogs are returned', async () => {
+    const response = await api.get('/api/blogs')
+    // execution gets here only after the HTTP request is complete
+    expect(response.body).toHaveLength(listHelper.blogs.length)
+  })
+
+  // Test for ID Existence
+  test('the unique identifier property of the blog posts is named id', async () => {
+    const response = await api.get('/api/blogs')
+    response.body.map(blog => {
+      expect(blog.id).toBeDefined()
+    })
   })
 })
 
-// Test for POST
-test('a valid blog can be added', async () => {
-  const newBlog = {
-    'title': 'Sorry just so quickly, it is James Hype, bitch',
-    'author': 'James Hype',
-    'url': 'https://csdn/checkthings.com',
-    'likes': 10
-  }
+describe('addition of a new blog', () => {
+  // Test for POST
+  test('a valid blog can be added', async () => {
+    const newBlog = {
+      'title': 'Sorry just so quickly, it is James Hype, bitch',
+      'author': 'James Hype',
+      'url': 'https://csdn/checkthings.com',
+      'likes': 10
+    }
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-  const blogsAtEnd = await listHelper.blogsInDb()
-  expect(blogsAtEnd).toHaveLength(listHelper.blogs.length + 1)
+    const blogsAtEnd = await listHelper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(listHelper.blogs.length + 1)
 
-  const titles = blogsAtEnd.map(blog => blog.title)
-  expect(titles).toContain('Sorry just so quickly, it is James Hype, bitch')
+    const titles = blogsAtEnd.map(blog => blog.title)
+    expect(titles).toContain('Sorry just so quickly, it is James Hype, bitch')
+  })
+  // Test for missing Likes POST
+  test('missing likes should default to zero', async () => {
+    const newBlog = {
+      'title': 'I am drunk and I am high, and I am in Chicago',
+      'author': 'John Summit',
+      'url': 'https://offthegridrecord/origin-js.com'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await listHelper.blogsInDb()
+    const addedBlog = blogsAtEnd.filter(blog => blog.title === 'I am drunk and I am high, and I am in Chicago')
+    expect(addedBlog[0].likes).toBe(0)
+  })
+  // Test for missing title or url POST
+  test('missing title or url is bad request', async () => {
+    const noUrlBlog = {
+      'title': 'The less you give it to me the more I want it',
+      'author': 'James Hype',
+      'likes': 257
+    }
+    const noTitleBlog = {
+      'author': 'judd147',
+      'url': 'bet365.com',
+      'likes': 500
+    }
+    await api
+      .post('/api/blogs')
+      .send(noUrlBlog)
+      .expect(400)
+    await api
+      .post('/api/blogs')
+      .send(noTitleBlog)
+      .expect(400)
+  })
 })
 
-// Test for missing Likes POST
-test('missing likes should default to zero', async () => {
-  const newBlog = {
-    'title': 'I am drunk and I am high, and I am in Chicago',
-    'author': 'John Summit',
-    'url': 'https://offthegridrecord/origin-js.com'
-  }
+describe('deletion and update likes of a blog', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const blogsAtStart = await listHelper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
 
-  const blogsAtEnd = await listHelper.blogsInDb()
-  const addedBlog = blogsAtEnd.filter(blog => blog.title === 'I am drunk and I am high, and I am in Chicago')
-  expect(addedBlog[0].likes).toBe(0)
-})
+    const blogsAtEnd = await listHelper.blogsInDb()
 
-// Test for missing title or url POST
-test('missing title or url is bad request', async () => {
-  const noUrlBlog = {
-    'title': 'The less you give it to me the more I want it',
-    'author': 'James Hype',
-    'likes': 257
-  }
-  const noTitleBlog = {
-    'author': 'judd147',
-    'url': 'bet365.com',
-    'likes': 500
-  }
-  await api
-    .post('/api/blogs')
-    .send(noUrlBlog)
-    .expect(400)
-  await api
-    .post('/api/blogs')
-    .send(noTitleBlog)
-    .expect(400)
+    expect(blogsAtEnd).toHaveLength(listHelper.blogs.length - 1)
+
+    const titles = blogsAtEnd.map(blog => blog.title)
+
+    expect(titles).not.toContain(blogToDelete.title)
+  })
+
+  test('can update likes of a blog', async () => {
+    const blogsAtStart = await listHelper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+    const newBlog = {
+      'title': blogToUpdate.title,
+      'author': blogToUpdate.author,
+      'url': blogToUpdate.url,
+      'likes': 147,
+    }
+
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(newBlog)
+
+    const blogsAtEnd = await listHelper.blogsInDb()
+    const blogToTest = blogsAtEnd.filter(blog => blog.title === blogToUpdate.title)
+    expect(blogToTest[0].likes).toBe(147)
+  })
 })
 
 test('dummy returns one', () => {

@@ -40,24 +40,18 @@ blogsRouter.post('/', async (request, response) => {
   response.status(201).json(savedBlog) // respond with status code 201 created
 })
 
-/* Route for deleting resources
-blogsRouter.delete('/:id', (request, response, next) => {
-  Blog.findByIdAndRemove(request.params.id).then(() => {
-    response.status(204).end() // respond with status code 204 no content
-  })
-    .catch(error => next(error)) // continue to the custom error handler middleware
+// Route for deleting resources
+blogsRouter.delete('/:id', async (request, response) => {
+  await Blog.findByIdAndRemove(request.params.id)
+  response.status(204).end() // respond with status code 204 no content
 })
-*/
 
-/* Route for updating resources
-blogsRouter.put('/:id', (request, response, next) => {
-  const { content, important } = request.body
+// Route for updating resources
+blogsRouter.put('/:id', async (request, response) => {
+  const { title, author, url, likes } = request.body
 
-  Blog.findByIdAndUpdate(request.params.id, { content, important }, { new: true, runValidators: true, context: 'query' }) // cause our event handler to be called with the new modified document
-    .then(updatedNote => {
-      response.json(updatedNote)
-    })
-    .catch(error => next(error)) // continue to the custom error handler middleware
+  const updatedNote = await Blog.findByIdAndUpdate(request.params.id, { title, author, url, likes }, { new: true, runValidators: true, context: 'query' })
+  response.json(updatedNote)
 })
-*/
+
 module.exports = blogsRouter
