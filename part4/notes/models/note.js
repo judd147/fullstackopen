@@ -1,4 +1,4 @@
-/* THIS FLIE DEFINES THE MONGOOSE SCHEMA */
+/* THIS FLIE DEFINES THE MONGOOSE SCHEMA FOR NOTE */
 
 const mongoose = require('mongoose')
 
@@ -9,7 +9,11 @@ const noteSchema = new mongoose.Schema({
     minLength: 5,
     required: true
   },
-  important: Boolean
+  important: Boolean,
+  user: {
+    type: mongoose.Schema.Types.ObjectId, // The id of user who created the note is referenced
+    ref: 'User'
+  }
 })
 
 // Change the configurable options of the schema
