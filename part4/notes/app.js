@@ -6,6 +6,8 @@ require('express-async-errors')
 const app = express()
 const cors = require('cors')
 const notesRouter = require('./controllers/notes')
+const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
@@ -28,6 +30,8 @@ app.use(express.json()) // use express json parser to help access data
 app.use(middleware.requestLogger)
 
 app.use('/api/notes', notesRouter) // define the router and its base url
+app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 app.use(middleware.unknownEndpoint) // next to the last middleware
 app.use(middleware.errorHandler) // this has to be the last loaded middleware

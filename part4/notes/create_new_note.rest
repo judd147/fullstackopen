@@ -1,7 +1,7 @@
-POST http://localhost:3001/api/notes
+POST http://localhost:3001/api/login
 content-type: application/json
 
 {
-    "content": "Make sure everything still works",
-    "important": true
+    "username": "mluukkai",
+    "password": "salainen"
 }

@@ -1,11 +1,12 @@
-/* THIS FLIE DEFINES ROUTE HANDLERS */
+/* THIS FLIE DEFINES NOTE ROUTE HANDLERS */
 
 const notesRouter = require('express').Router() // create a new router object
 const Note = require('../models/note') // import the database schema
+const User = require('../models/user')
 
 // Route for fetching all resources
 notesRouter.get('/', async (request, response) => {
-  const notes = await Note.find({}) // fetch all notes from MongoDB
+  const notes = await Note.find({}).populate('user', { username: 1, name: 1 }) // fetch all notes from MongoDB and reference users
   response.json(notes) // send the notes array as a JSON formatted string
 })
 
@@ -28,12 +29,17 @@ notesRouter.post('/', async (request, response) => {
     return response.status(400).json({ error: 'content missing' })
   }
 
+  const user = await User.findById(body.userId) // information about the user is sent in the userId field
+
   const note = new Note({
     content: body.content,
     important: body.important || false, // If the property does not exist, the expression will evaluate to false
+    user: user.id
   })
 
   const savedNote = await note.save() // save the new object to database
+  user.notes = user.notes.concat(savedNote._id) // link noteID to user
+  await user.save() // save the user object to database
   response.status(201).json(savedNote) // respond with status code 201 created
 })
 

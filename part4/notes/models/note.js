@@ -11,7 +11,7 @@ const noteSchema = new mongoose.Schema({
   },
   important: Boolean,
   user: {
-    type: mongoose.Schema.Types.ObjectId, // The id of user who created the note is referenced
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }
 })
