@@ -23,6 +23,10 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'malformatted id' }) // respond with status code 400 Bad Request
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message }) // handle validation errors
+  } else if (error.name ===  'JsonWebTokenError') {
+    return response.status(400).json({ error: error.message }) // handle missing or invalid token
+  } else if (error.name === 'TokenExpiredError') {
+    return response.status(401).json({ error: 'token expired' }) // handle expired token
   }
 
   next(error) // else, passes the error forward to the default Express error handler

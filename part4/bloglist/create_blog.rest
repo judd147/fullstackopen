@@ -1,0 +1,11 @@
+POST http://localhost:3003/api/blogs
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImxpeWFvemhhbmc3IiwiaWQiOiI2NDllNGVlNWM5ZGVkOTIxYjMwMDI3ZDkiLCJpYXQiOjE2ODgxMTM5NjIsImV4cCI6MTY4ODExNzU2Mn0.wysv1D97-XFyhSUfe6BP2kT83SsqTbjkVOFLVdc0KtM
+
+{
+  "title": "Next Chaper",
+  "author": "liyaozhang7",
+  "url": "https://canada.ca",
+  "likes": 124,
+  "userID": "649e4ee5c9ded921b30027d9"
+}

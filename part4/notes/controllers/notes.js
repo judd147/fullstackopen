@@ -3,6 +3,16 @@
 const notesRouter = require('express').Router() // create a new router object
 const Note = require('../models/note') // import the database schema
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+
+// Isolates the token from the authorization header
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '')
+  }
+  return null
+}
 
 // Route for fetching all resources
 notesRouter.get('/', async (request, response) => {
@@ -28,8 +38,12 @@ notesRouter.post('/', async (request, response) => {
   if (body.content === undefined) {
     return response.status(400).json({ error: 'content missing' })
   }
-
-  const user = await User.findById(body.userId) // information about the user is sent in the userId field
+  // Check and decode the token
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  if (!decodedToken.id) { // If token does not contain the user's identity, respond with status code 401 unauthorized
+    return response.status(401).json({ error: 'token invalid' })
+  }
+  const user = await User.findById(decodedToken.id) // information about the user is sent back
 
   const note = new Note({
     content: body.content,
