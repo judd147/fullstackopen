@@ -53,8 +53,20 @@ blogsRouter.post('/', async (request, response) => {
 
 // Route for deleting resources
 blogsRouter.delete('/:id', async (request, response) => {
-  await Blog.findByIdAndRemove(request.params.id)
-  response.status(204).end() // respond with status code 204 no content
+  // Check and decode the token
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!decodedToken.id) { // If token does not contain the user's identity, respond with status code 401 unauthorized
+    return response.status(401).json({ error: 'token invalid' })
+  }
+  // Get and compare blog id and user id
+  const blog = await Blog.findById(request.params.id)
+  if (blog.user.toString() === decodedToken.id.toString()) {
+    await Blog.findByIdAndRemove(request.params.id)
+    response.status(204).end() // respond with status code 204 no content
+  }
+  else {
+    return response.status(401).json({ error: 'access denied' }) // If user is not creator of the blog, respond with status code 401 unauthorized
+  }
 })
 
 // Route for updating resources
